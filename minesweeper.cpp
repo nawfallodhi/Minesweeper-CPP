@@ -193,7 +193,7 @@ void Board:: starterTile(int x, int y, Board &real_board){
             if(i >=0 && i < sides && j >=0 && j < sides){
                 if(real_board.board[i][j] == -1){
                     real_board.board[i][j] = 0;
-                    active_mines--; // remove any nearby mines
+                    real_board.active_mines--; // remove any nearby mines
                 }
             }
         }
@@ -250,41 +250,65 @@ void playMinesweeper(Board &real_board){
     std::cout<<"Welcome to Minesweeper!!!\n"<<std::endl;
 
     bool first_move = true;
+    bool game_over = false;
 
     int x,y;
     
     real_board.setdifficuly();
     real_board.placeMines();
     real_board.placeNumbers();
-    //real_board.printBoard();
 
     Board player_board(real_board.getMines(),real_board.getSides()); //user board
-
     player_board.printBoard();
 
-    while(player_board.getActiveMines() < real_board.getActiveMines()){
+    while(!game_over){
 
         std::cout<<"Please enter the coordinates of the cell to uncover"<<std::endl;
         std::cin>>x>>y;
+
+        if(x<0 || x>= real_board.getSides() || y<0 || y>= real_board.getSides()){
+            std::cout<<"Invalid Coordinates. Try again\n";
+            continue;
+        }
         
         if(first_move) {
-            // Ensure the first move is always safe
-            if(real_board.retrieveValue(x, y) == -1) {
-                player_board.starterTile(x, y, real_board);
-            }
+            player_board.starterTile(x, y, real_board);
             first_move = false;
         }
-        if(!real_board.playMove(x, y)) {
+
+        
+        if(real_board.retrieveValue(x,y) == -1){
             std::cout << "You hit a mine! Game over!\n";
+            game_over = true;
+            //reveal all mines
+            for(int i=0;i < real_board.getSides(); i++){
+                for(int j = 0; j < real_board.getSides(); j++){
+                    if(real_board.retrieveValue(i, j) == -1){
+                        player_board.editValue(i, j, real_board);
+                    }
+                }
+            }
+            player_board.printBoard();
             break;
         }
 
         player_board.uncoverTiles(x,y,real_board);
         player_board.printBoard();
 
-        if(player_board.getActiveMines() == real_board.getSides() * real_board.getSides() - real_board.getMines()) {
+
+        int total_safe_cells = real_board.getSides() * real_board.getSides() - real_board.getMines();
+        int uncovered_cells =0;
+        for (int i=0;i<player_board.getSides();i++){
+            for(int j=0;j<player_board.getSides();j++){
+                if(player_board.retrieveValue(i,j) !=-2){
+                    uncovered_cells++;
+                }
+            }
+        }
+
+        if(uncovered_cells == total_safe_cells) {
             std::cout << "Congratulations! You cleared the board!\n";
-            break;
+            game_over = true;
         }
         
     }
