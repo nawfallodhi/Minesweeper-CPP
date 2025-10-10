@@ -3,38 +3,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iomanip>
-
-class Board{
-    private:
-        int mines;
-        int sides;
-        int active_mines;
-        std::vector<std::vector<int>> board;
-
-    public:
-        Board();
-        Board(int mines, int sides);
-        Board(const Board &b);
-        void setdifficuly(); 
-        void printBoard();
-        void placeMines();
-        void placeNumbers();
-
-        bool playMove(int x, int y);
-
-        int getMines();
-        int getSides();
-        int getActiveMines();
-
-        void setActiveMines();
-
-        int retrieveValue(int x, int y);
-        void editValue(int x, int y, Board &b);
-
-        void uncoverTiles(int x, int y, Board &real_board);
-
-        void starterTile(int x, int y, Board &real_board);
-};
+#include "minesweeper_header.h"
 
 Board:: Board(){
     mines = 0;
@@ -214,7 +183,7 @@ void Board:: uncoverTiles(int x, int y, Board &real_board){
 void Board:: starterTile(int x, int y, Board &real_board){
     if(real_board.board[x][y] == -1){
         real_board.board[x][y] = 0;
-        active_mines--; 
+        real_board.active_mines--; 
     }
 
 
@@ -233,12 +202,12 @@ void Board:: starterTile(int x, int y, Board &real_board){
 
     std::srand(std::time(0));
     
-    while(active_mines<mines){
+    while(real_board.active_mines<real_board.mines){
         int rows = std::rand() % (sides);
         int column = std::rand() % (sides);
         if(real_board.board[rows][column] == 0 && !(rows >= x-1 && rows <= x+1 && column >= y-1 && column <= y+1)){
             real_board.board[rows][column] = -1;
-            active_mines++;
+            real_board.active_mines++;
         }
     }
     real_board.placeNumbers();

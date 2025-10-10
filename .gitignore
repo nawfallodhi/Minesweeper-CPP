@@ -1,3 +1,3 @@
-build/    # Ignores the entire build directory
-*.exe     # Ignores all .exe files  
-*.o       # Ignores all object files
+build/    
+*.exe     
+*.o       
