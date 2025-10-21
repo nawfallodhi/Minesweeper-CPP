@@ -213,6 +213,12 @@ void Board:: starterTile(int x, int y, Board &real_board){
     real_board.placeNumbers();
 }
 
+void Board::initializeForMines() {
+    board.clear();
+    board.resize(sides, std::vector<int>(sides, 0));
+    active_mines = 0;
+}
+
 bool Board:: playMove(int x, int y){
 
     if(board.at(x).at(y) == -1){
@@ -316,10 +322,10 @@ void playMinesweeper(Board &real_board){
 }
 
 
-int main(){
+// int main(){
 
-    Board real_board;
-    playMinesweeper(real_board);
+//     Board real_board;
+//     playMinesweeper(real_board);
     
-    return 0;
-}
+//     return 0;
+// }

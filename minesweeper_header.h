@@ -33,6 +33,8 @@ class Board{
         void uncoverTiles(int x, int y, Board &real_board);
 
         void starterTile(int x, int y, Board &real_board);
+
+        void initializeForMines();
 };
 
 #endif

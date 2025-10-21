@@ -10,6 +10,10 @@ set(CMAKE_PREFIX_PATH "C:/Qt/6.9.3/mingw_64/lib/cmake")
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
-add_executable(minesweeper qt.cpp)
+add_executable(minesweeper 
+    qt.cpp
+    minesweeper.cpp
+    minesweeper_header.h
+)
 
 target_link_libraries(minesweeper PRIVATE Qt6::Widgets)
