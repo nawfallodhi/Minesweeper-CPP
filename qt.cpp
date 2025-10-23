@@ -17,6 +17,7 @@ private:
     int rows, cols, mines;
     QWidget* centralWidget;
     QGridLayout* gridLayout;
+    QLabel* mineCounter;
     QVector<QVector<QPushButton*>> buttons;
     bool firstMove;
     bool gameOver;
@@ -37,21 +38,39 @@ public:
 
         // Create central widget and layout
         centralWidget = new QWidget(this);
-        gridLayout = new QGridLayout(centralWidget);
+
+        QVBoxLayout* mainLayout = new QVBoxLayout(centralWidget);
+        mainLayout->setSpacing(2);
+        mainLayout->setContentsMargins(10,10,10,10);
+        
+        mineCounter = new QLabel(QString("Mines: %1").arg(mines));
+        mainLayout->addWidget(mineCounter);
+        
+        QWidget* gridContainer = new QWidget();
+        gridContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        gridLayout = new QGridLayout(gridContainer);
         gridLayout->setSpacing(0);
+        gridLayout->setContentsMargins(0,0,0,0);
+
+        mainLayout->addWidget(gridContainer);
+        mainLayout->setAlignment(gridContainer, Qt::AlignCenter);
         
         // Create the grid of buttons - all start covered
         for (int i = 0; i < rows; ++i) {
             QVector<QPushButton*> rowButtons;
             for(int j = 0; j < cols; ++j){
                 QPushButton* button = new QPushButton();
-                button->setFixedSize(30, 30);
+                //button->setFixedSize(30, 30);
+                
+                button->setMinimumSize(25, 25);  // Minimum size
+                button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+                
                 button->setProperty("row", i);
                 button->setProperty("col", j);
                 
                 // All buttons start as covered (blank)
                 button->setText("");
-                button->setStyleSheet("QPushButton { background-color: lightgray; border: 1px solid darkgray; }");
+                button->setStyleSheet("QPushButton { background-color: lightgray; border: 1px solid darkgray; margin: 0px; padding: 0px; }");
                 
                 // Connect click handler
                 connect(button, &QPushButton::clicked, this, &GameWindow::onCellClicked);
@@ -64,16 +83,41 @@ public:
         
         setCentralWidget(centralWidget);
         
-        int width = cols * 32 + 20;
-        int height = rows * 32 + 50;
-        setFixedSize(width, height);
+        int width = cols * 30 + 50;
+        int height = rows * 30 + 100;
+        //setFixedSize(width, height);
+
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        centralWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        setMinimumSize(width, height);
     }
 
     ~GameWindow(){
         delete realBoard;
         delete playerBoard;
     }
-
+protected:
+    void resizeEvent(QResizeEvent* event) override {
+        QMainWindow::resizeEvent(event);
+        
+        // Calculate new tile size based on window size
+        int availableWidth = centralWidget->width() - 20;  // Account for margins
+        int availableHeight = centralWidget->height() - 50; // Account for counter and margins
+        
+        int tileWidth = availableWidth / cols;
+        int tileHeight = availableHeight / rows;
+        int tileSize = qMin(tileWidth, tileHeight);
+        
+        // Limit tile size
+        tileSize = qMax(25, qMin(50, tileSize));  // Between 25px and 50px
+        
+        // Apply to all buttons
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                buttons[i][j]->setFixedSize(tileSize, tileSize);
+            }
+        }
+    }
 private slots:
     void onCellClicked() {
         if (gameOver) return;
