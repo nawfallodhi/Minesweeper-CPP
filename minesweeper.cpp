@@ -187,29 +187,45 @@ void Board:: starterTile(int x, int y, Board &real_board){
     }
 
 
-    // Optionally, ensure no mines around the starter tile
-    for(int i = x-1; i <= x+1; i++){
-        for(int j = y-1; j <= y+1; j++){
-            if(i >=0 && i < sides && j >=0 && j < sides){
-                if(real_board.board[i][j] == -1){
-                    real_board.board[i][j] = 0;
-                    real_board.active_mines--; // remove any nearby mines
-                }
-            }
-        }
-    }
+    // ensure no mines around the starter tile - not part of minesweeper
+    // for(int i = x-1; i <= x+1; i++){
+    //     for(int j = y-1; j <= y+1; j++){
+    //         if(i >=0 && i < sides && j >=0 && j < sides){
+    //             if(real_board.board[i][j] == -1){
+    //                 real_board.board[i][j] = 0;
+    //                 real_board.active_mines--; // remove any nearby mines
+    //             }
+    //         }
+    //     }
+    // }
 
 
-    std::srand(std::time(0));
+    // std::srand(std::time(0));
     
-    while(real_board.active_mines<real_board.mines){
-        int rows = std::rand() % (sides);
-        int column = std::rand() % (sides);
-        if(real_board.board[rows][column] == 0 && !(rows >= x-1 && rows <= x+1 && column >= y-1 && column <= y+1)){
-            real_board.board[rows][column] = -1;
+    // while(real_board.active_mines<real_board.mines){
+    //     int rows = std::rand() % (sides);
+    //     int column = std::rand() % (sides);
+    //     if(real_board.board[rows][column] == 0 && !(rows >= x-1 && rows <= x+1 && column >= y-1 && column <= y+1)){
+    //         real_board.board[rows][column] = -1;
+    //         real_board.active_mines++;
+    //     }
+    // }
+    bool placed = false;
+    int attempts =0;
+
+    while(!placed && attempts<1000){
+        int newRow = std::rand() % sides;
+        int newCol = std::rand() % sides;
+
+        if(!(newRow == x &&  newCol == y) && real_board.board[newRow][newCol] == 0){
+            real_board.board[newRow][newCol] = -1;
             real_board.active_mines++;
+            placed = true;
         }
+        attempts++;
     }
+
+
     real_board.placeNumbers();
 }
 
