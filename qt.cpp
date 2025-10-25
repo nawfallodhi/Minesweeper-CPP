@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QComboBox>
 #include <QWidget>
+#include <QListView>
 #include <QVector>
 #include "minesweeper_header.h"
 
@@ -19,6 +20,7 @@ private:
     QGridLayout* gridLayout;
     QLabel* mineCounter;
     QVector<QVector<QPushButton*>> buttons;
+    QVector<QVector<bool>> flags;
     bool firstMove;
     bool gameOver;
 
@@ -28,13 +30,18 @@ public:
         
         setWindowTitle("Minesweeper");
 
+        flags.resize(rows);
+        for(int i=0;i<rows;i++){
+            flags[i].resize(cols, false);
+        }
+        
         realBoard = new Board(mines, cols);
         realBoard->initializeForMines();
         
         realBoard->placeMines();
         realBoard->placeNumbers();
 
-        playerBoard = new Board(mines, cols);  // This initializes with -2
+        playerBoard = new Board(mines, cols);  
 
         // Create central widget and layout
         centralWidget = new QWidget(this);
@@ -75,6 +82,9 @@ public:
                 // Connect click handler
                 connect(button, &QPushButton::clicked, this, &GameWindow::onCellClicked);
                 
+                button->setContextMenuPolicy(Qt::CustomContextMenu);
+                connect(button, &QPushButton::customContextMenuRequested,this, &GameWindow::onRightClick);
+
                 gridLayout->addWidget(button, i, j);
                 rowButtons.append(button);
             }
@@ -112,30 +122,31 @@ protected:
         tileSize = qMax(25, qMin(50, tileSize));  // Between 25px and 50px
         
         // Apply to all buttons
-        for (int i = 0; i < rows; ++i) {
-            for (int j = 0; j < cols; ++j) {
+        for(int i = 0; i < rows; ++i){
+            for(int j = 0; j < cols; ++j){
                 buttons[i][j]->setFixedSize(tileSize, tileSize);
             }
         }
     }
 private slots:
     void onCellClicked() {
-        if (gameOver) return;
+        if(gameOver) return;
         
         QPushButton* button = qobject_cast<QPushButton*>(sender());
-        if (button) {
+        if(button) {
             int row = button->property("row").toInt();
             int col = button->property("col").toInt();
             
-            // Handle first move (safe start)
-            if (firstMove) {
+            if(firstMove) {
                 playerBoard->starterTile(row, col, *realBoard);
                 firstMove = false;
             }
 
-            // Check if mine was hit
-            if (realBoard->retrieveValue(row, col) == -1) {
-                // Game over - reveal all mines
+            if(flags[row][col]){
+                return;
+            }
+
+            if(realBoard->retrieveValue(row, col) == -1){
                 revealAllMines();
                 QMessageBox::information(this, "Game Over", "You hit a mine! Game over!");
                 gameOver = true;
@@ -147,32 +158,38 @@ private slots:
             updateBoardDisplay();
             
             // Check win condition
-            if (checkWinCondition()) {
+            if(checkWinCondition()){
                 QMessageBox::information(this, "Congratulations", "You cleared the board!");
                 gameOver = true;
             }
         }
     }
     
-    void updateBoardDisplay() {
-        for (int i = 0; i < rows; ++i) {
-            for (int j = 0; j < cols; ++j) {
+    void updateBoardDisplay(){
+        for(int i = 0; i < rows; ++i){
+            for(int j = 0; j < cols; ++j){
                 int playerValue = playerBoard->retrieveValue(i, j);
                 QPushButton* button = buttons[i][j];
                 
-                if (playerValue == -2) {
+                if(flags[i][j] && playerValue == -2){
+                    button->setText("🚩");
+                    button->setStyleSheet("QPushButton { background-color: lightgray; border: 1px solid darkgray; color: red; }");
+                    continue; 
+                }
+                
+                if(playerValue == -2) {
                     // Cell is still covered
                     button->setText("");
                     button->setStyleSheet("QPushButton { background-color: lightgray; border: 1px solid darkgray; }");
-                } else {
+                } else{
                     // Cell is uncovered - show real value
                     button->setEnabled(false);
                     int realValue = realBoard->retrieveValue(i, j);
                     
-                    if (realValue == -1) {
+                    if(realValue == -1) {
                         button->setText("💣");
                         button->setStyleSheet("QPushButton { background-color: red; border: 1px solid black; }");
-                    } else if (realValue == 0) {
+                    } else if(realValue == 0) {
                         button->setText("");
                         button->setStyleSheet("QPushButton { background-color: white; border: 1px solid darkgray; }");
                     } else {
@@ -206,6 +223,50 @@ private slots:
         }
         
         return uncoveredCells == totalSafeCells;
+    }
+
+    void updateMineCounter(){
+        int count = 0;
+        for(int i=0;i<rows;i++){
+            for(int j=0;j<cols;j++){
+                if(flags[i][j]){
+                    count++;
+                }
+            }
+        }
+        mineCounter->setText(QString("Mines: %1").arg(mines-count));
+    }
+
+    void onRightClick(){
+        if(gameOver){
+            return;
+        }
+
+        QPushButton* button = qobject_cast<QPushButton*>(sender());
+        if(button){
+            int row = button->property("row").toInt();
+            int col = button->property("col").toInt();
+
+            if(row < 0 || row >= rows || col < 0 || col >= cols){
+                return;
+            } 
+            
+            if(playerBoard->retrieveValue(row,col) == -2){
+                flags[row][col] = !flags[row][col];
+
+
+                if(flags[row][col]){
+                    button->setText("🚩");
+                    button->setStyleSheet("QPushButton { background-color: lightgray; border: 1px solid darkgray; color: red; }");
+                } else{
+                    button->setText("");
+                    button->setStyleSheet("QPushButton { background-color: lightgray; border: 1px solid darkgray; }");
+                }
+
+
+                updateMineCounter();
+            }
+        }
     }
 };
 

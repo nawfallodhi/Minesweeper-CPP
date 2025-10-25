@@ -120,7 +120,7 @@ void Board:: placeNumbers(){
 
     for(int i=0;i<sides;i++){
         for(int j=0;j<sides;j++){
-            if(board.at(i).at(j) == 0){
+            if(board.at(i).at(j) != -1){
 
                 if((j+1 < sides) && board.at(i).at(j+1) == -1){               //EAST
                     counter++;
