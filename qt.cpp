@@ -148,9 +148,15 @@ private slots:
 
             if(realBoard->retrieveValue(row, col) == -1){
                 revealAllMines();
-                QMessageBox::information(this, "Game Over", "You hit a mine! Game over!");
-                gameOver = true;
-                return;
+
+                QMessageBox::StandardButton reply;
+                reply = QMessageBox::question(this, "Game Over", "You hit a mine! Game over!\nWould you like to restart?",QMessageBox::Yes | QMessageBox::No);
+                if(reply == QMessageBox::Yes){
+                    restartGame();
+                } else{
+                    gameOver = true;
+                    return;
+                }
             }
             
             // Uncover this cell and potentially others
@@ -159,8 +165,15 @@ private slots:
             
             // Check win condition
             if(checkWinCondition()){
-                QMessageBox::information(this, "Congratulations", "You cleared the board!");
-                gameOver = true;
+                
+                QMessageBox::StandardButton reply;
+                reply = QMessageBox::question(this, "Congradulations", "You cleared the board!\nWould you like to restart?",QMessageBox::Yes | QMessageBox::No);
+                if(reply == QMessageBox::Yes){
+                    restartGame();
+                } else{
+                    gameOver = true;
+                    return;
+                }
             }
         }
     }
@@ -267,6 +280,78 @@ private slots:
                 updateMineCounter();
             }
         }
+    }
+
+    void restartGame(){
+        // firstMove = true;
+        // gameOver = false;
+
+        // for(int i=0;i<rows;i++){
+        //     for(int j=0;j<cols;j++){
+        //         flags[i][j] = false;
+        //     }
+        // }
+
+        // delete realBoard;
+        // delete playerBoard;
+
+        // realBoard = new Board(mines, cols);
+        // realBoard->initializeForMines();
+        // realBoard->placeMines();
+        // realBoard->placeNumbers();
+
+        // playerBoard = new Board(mines, cols);
+
+        // for(int i=0;i<rows;i++){
+        //     for(int j=0;j<cols;j++){
+        //         QPushButton* button = buttons[i][j];
+        //         button->setEnabled(true);
+        //         button->setText("");
+        //         button->setStyleSheet("QPushButton { background-color: lightgray; border: 1px solid darkgray; margin: 0px; padding: 0px; }");
+        //     }
+        // }
+
+        // updateMineCounter();
+
+            this->close();
+    
+    // Recreate and show the start window (copy from your main())
+    QWidget* startWindow = new QWidget();
+    startWindow->setWindowTitle("Select Difficulty");
+    startWindow->setFixedSize(300, 150);
+
+    QVBoxLayout* layout = new QVBoxLayout(startWindow);
+
+    QComboBox* combo = new QComboBox();
+    combo->addItem("Beginner (9x9)");
+    combo->addItem("Intermediate (16x16)");
+    combo->addItem("Advanced (24x24)");
+
+    QPushButton* startButton = new QPushButton("Start Game");
+    layout->addWidget(combo);
+    layout->addWidget(startButton);
+    startWindow->setLayout(layout);
+
+    QObject::connect(startButton, &QPushButton::clicked, [=]() {
+        int newRows, newCols, newMines;
+        QString choice = combo->currentText();
+
+        if(choice.contains("Beginner")){ 
+            newRows = 9; newCols = 9; newMines = 10;
+        }
+        else if(choice.contains("Intermediate")){ 
+            newRows = 16; newCols = 16; newMines = 40;
+        }
+        else{ 
+            newRows = 24; newCols = 24; newMines = 99;
+        }
+
+        GameWindow* newGame = new GameWindow(newRows, newCols, newMines);
+        newGame->show();
+        startWindow->close();
+    });
+
+    startWindow->show();
     }
 };
 
