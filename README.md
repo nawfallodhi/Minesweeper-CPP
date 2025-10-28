@@ -2,7 +2,7 @@
 
 A classic Minesweeper game built with Qt/C++ featuring multiple difficulty levels, flagging, and a clean interface.
 
-## 🎮 Download and Play
+## Download and Play
 
 [**Download for Windows**](https://github.com/nawfallodhi/Minesweeper-CPP/releases/latest/download/minesweeper_windows.zip)
 
@@ -12,7 +12,7 @@ A classic Minesweeper game built with Qt/C++ featuring multiple difficulty level
 3. Run `minesweeper.exe`
 4. No installation required!
 
-## 🚀 Features
+## Features
 - **3 Difficulty Levels**: Beginner (9x9), Intermediate (16x16), Advanced (24x24)
 - **Smart First Click**: Guaranteed safe start
 - **Right-Click Flagging**: Mark potential mines with 🚩
@@ -20,7 +20,7 @@ A classic Minesweeper game built with Qt/C++ featuring multiple difficulty level
 - **Resizable Window**: Adaptive tile sizing
 - **Win/Lose Detection**: Clear game end states
 
-## 🛠️ Build from Source
+## Build from Source
 
 ### Requirements
 - Qt 6.x
